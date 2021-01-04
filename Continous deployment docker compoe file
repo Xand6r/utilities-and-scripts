@@ -1,0 +1,61 @@
+version: '3'
+    
+services:
+  #MySQL Service
+  mysql-server:
+    image: mysql:8.0.19
+    restart: always
+    container_name: database
+    environment:
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_PASSWORD: pwd
+      MYSQL_USER: usr
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+   
+  phpmyadmin:
+    container_name: cpco_phpmyadmin
+    image: phpmyadmin/phpmyadmin:5.0.1
+    restart: always
+    environment:
+      PMA_HOST: mysql-server
+    ports:
+      - "90:80"
+    depends_on:
+      - mysql-server
+     
+  #api Service
+  api:
+    container_name: another_container_name
+    image: index.docker.io/reponame/imagename:latest
+    restart: always
+    command: nodemon app.js
+    ports:
+      - "8081:8000"
+    depends_on:
+      - mysql-server
+
+  #web service
+  web:
+    container_name: container_name
+    image: index.docker.io/reponame/imagename:latest
+    deploy:
+        restart_policy:
+            condition: any
+    ports:
+        - 80:80
+
+  # watcher service to reload images
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 30
+  
+#Volumes
+volumes:
+  mysql-data:
