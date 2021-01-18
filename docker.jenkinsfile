@@ -1,0 +1,34 @@
+def apiImage
+pipeline {
+    agent any
+    environment {
+        HOME = '.'
+    }
+    stages {
+        stage("Build Docker Image") {
+            steps {
+                echo "Build Docker Image"
+                script {
+                    apiImage = docker.build("${params.DOCKER_IMAGE}:${params.TARGET_ENV}")
+                }
+            }
+        }
+        stage("Push to Docker Hub") {
+            steps {
+                echo "Push to Docker Hub"
+                script {
+                    docker.withRegistry("{path to local registry}") {
+                        apiImage.push()
+                    }
+                }
+            }
+        }
+        stage("Deploy to Server") {
+            steps {
+                echo "Deploy latest image"
+                sh "ansible-playbook /etc/ansible/playbooks/docker-deployment.yml"
+                echo "Completed successfully"
+            }
+        }
+    }
+}
