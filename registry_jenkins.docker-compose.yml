@@ -1,0 +1,21 @@
+version: "3"
+services:
+  jenkins:
+    restart: always
+    build:
+      context: .
+    image: path_to_docker_image
+    ports:
+      - "port:port"
+    volumes: 
+      - "jenkins:/var/jenkins_home"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - JENKINS_PASSWORD="strongpsasword"
+  docker:
+    restart: always
+    image: registry:2
+    ports:
+      - "5000:5000"
+volumes:
+  jenkins_repo:
